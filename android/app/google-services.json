@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "41149284653",
+    "project_id": "yatmadf-6f014",
+    "storage_bucket": "yatmadf-6f014.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:41149284653:android:11c954cc15bd02b26a93a4",
+        "android_client_info": {
+          "package_name": "naol.chala.firebase_test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "41149284653-6t28kacq72gc6rt3tu5uk47g3gulflkm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "naol.chala.firebase_test",
+            "certificate_hash": "07cb978338db8e8e3eaf93ca72dba92e786c498f"
+          }
+        },
+        {
+          "client_id": "41149284653-4dgu35p9vdqpscishb6n55i1h285f23a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzB42z46Re7p9pEv7jaD83HDYzYLhM9Yo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "41149284653-4dgu35p9vdqpscishb6n55i1h285f23a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "41149284653-ospf4g1ud8o8vf5hna3frpuc9covkf26.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "naol.chala.firebaseTest"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
