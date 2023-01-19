@@ -1,12 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_test/compontents/week_picker.dart';
 import 'package:firebase_test/models/journal.dart';
-import 'package:firebase_test/providers/journals.dart';
+import 'package:firebase_test/providers/journals_provider.dart';
 import 'package:firebase_test/providers/theme.dart';
 import 'package:firebase_test/providers/user.dart';
 import 'package:firebase_test/screens/add_journal.dart';
+import 'package:firebase_test/screens/home/journal_card.dart';
+import 'package:firebase_test/screens/home/journal_loading.dart';
 import 'package:firebase_test/screens/home/profile_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:iconsax/iconsax.dart';
@@ -19,7 +22,8 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var authState = ref.watch(authStateProvider);
     var themeMode = ref.watch(ThemeModeProvider);
-    var journals = ref.watch(journalsProvider);
+    var journalState = ref.watch(journalsProvider);
+    var currentDate = ref.watch(dateProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -46,41 +50,39 @@ class HomeScreen extends HookConsumerWidget {
         ],
       ),
       body: SafeArea(
-        child: journals.when(
-          data: (data) {
-            var docs = data.docs;
-            print(docs);
-            return ListView.builder(
-              itemCount: docs.length,
-              itemBuilder: (context, index) {
-                var journal = Journal.fromMap(docs[index].data());
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: const Icon(
-                          BoxIcons.bx_book_open,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: WeekDatePicker(
+                  initialDate: currentDate,
+                  onChange: (value) =>
+                      ref.read(dateProvider.notifier).changeDate(value),
+                ),
+              ),
+            ),
+            journalState.isLoading
+                ? const JournalLoading()
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => AnimationConfiguration.staggeredList(
+                        position: index,
+                        duration: const Duration(milliseconds: 400),
+                        child: SlideAnimation(
+                          verticalOffset: 50,
+                          curve: Curves.decelerate,
+                          child: FadeInAnimation(
+                            child: JournalCard(
+                              journal: journalState.journals[index],
+                            ),
+                          ),
                         ),
                       ),
-                      title: Text(journal.title),
-                      subtitle: Text(
-                          "Last Updated ${DateFormat.jm().format(journal.lastUpdatedAt)}"),
+                      childCount: journalState.journals.length,
                     ),
-                    const Divider(),
-                  ],
-                );
-              },
-            );
-          },
-          error: (err, stack) => const Text('Error...'),
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
+                  ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(

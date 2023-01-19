@@ -1,12 +1,8 @@
-import 'package:firebase_test/main.dart';
 import 'package:firebase_test/providers/theme.dart';
 import 'package:firebase_test/providers/user.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:iconsax/iconsax.dart';
-
-import 'home.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});

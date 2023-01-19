@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_test/models/journal.dart';
+import 'package:firebase_test/providers/journals_provider.dart';
 import 'package:firebase_test/providers/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -107,13 +107,6 @@ class AddTaskScreen extends HookConsumerWidget {
     if (titleController.text.isNotEmpty) {
       var title = titleController.text;
       var content = contentController.text;
-      var newJournal = Journal(
-        title: title,
-        content: content,
-        createdAt: date,
-        lastUpdatedAt: date,
-        uid: user.uid,
-      );
 
       showDialog(
         barrierDismissible: false,
@@ -136,11 +129,15 @@ class AddTaskScreen extends HookConsumerWidget {
         ),
       );
 
-      await FirebaseFirestore.instance
-          .collection('journals')
-          .add(newJournal.toMap())
-          .then((value) => Navigator.pop(context))
-          .catchError((err) => Navigator.pop(context));
+      Journal newJournal = Journal()
+        ..title = title
+        ..content = content
+        ..createdAt = date
+        ..lastUpdatedAt = date;
+
+      await isar.writeTxn(() async {
+        await isar.journals.put(newJournal);
+      }).then((value) => Navigator.pop(context));
     }
   }
 }

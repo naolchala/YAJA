@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:firebase_test/compontents/week_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -30,8 +31,8 @@ final GeneralTheme = ({Brightness? brightness}) => ThemeData(
       colorScheme: ThemeData(brightness: brightness ?? Brightness.light)
           .colorScheme
           .copyWith(
-            primary: Colors.indigoAccent,
-            secondary: Colors.amber,
+            primary: kPrimary,
+            secondary: kSecondary,
           ),
     );
 
