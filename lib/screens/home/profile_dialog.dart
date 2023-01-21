@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_test/compontents/week_picker.dart';
 import 'package:firebase_test/providers/user.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -59,14 +60,10 @@ class ProfileDialog extends ConsumerWidget {
                           ),
                           child: CachedNetworkImage(
                             imageUrl: authState.user?.photoURL ?? "",
-                            placeholder: (context, url) => Image.asset(
-                              "assets/employee-planner-1.png",
-                              fit: BoxFit.cover,
-                            ),
-                            errorWidget: (context, url, error) {
-                              print(error);
-                              return Text("error");
-                            },
+                            placeholder: (context, url) =>
+                                initialImage(authState),
+                            errorWidget: (context, url, error) =>
+                                initialImage(authState),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -128,6 +125,24 @@ class ProfileDialog extends ConsumerWidget {
                   )
                 ],
               ),
+      ),
+    );
+  }
+
+  Container initialImage(AuthState authState) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: kSecondaryAccent,
+      ),
+      child: Center(
+        child: Text(
+          authState.user!.displayName!.substring(0, 1),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 40,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

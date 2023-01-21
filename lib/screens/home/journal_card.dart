@@ -1,12 +1,21 @@
 import 'package:firebase_test/compontents/week_picker.dart';
 import 'package:firebase_test/controllers/journals_controller.dart';
 import 'package:firebase_test/models/journal.dart';
+import 'package:firebase_test/providers/journals_provider.dart';
+import 'package:firebase_test/screens/edit_journal.dart';
+import 'package:firebase_test/screens/view_journal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
+
+enum OptionActions {
+  edit,
+  delete,
+  close,
+}
 
 class JournalCard extends HookConsumerWidget {
   const JournalCard({
@@ -21,82 +30,53 @@ class JournalCard extends HookConsumerWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       child: InkWell(
-        onLongPress: () {
-          showDialog(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewJournal(journal),
+          ),
+        ),
+        onLongPress: () async {
+          OptionActions action = await showDialog(
             context: context,
-            builder: (context) => SimpleDialog(children: [
-              SimpleDialogOption(
-                child: ListTile(
-                  onTap: () {},
-                  leading: const Icon(BoxIcons.bx_edit_alt),
-                  title: const Text("Edit"),
-                ),
-              ),
-              SimpleDialogOption(
-                child: ListTile(
-                  onTap: () async {
-                    Navigator.pop(context);
-                    bool sure = await showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text("Are you sure?"),
-                        content: Text("Delete \"${journal.title}\"?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context, true);
-                            },
-                            child: const Text("Delete"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context, false);
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll(
-                                kPrimary.withOpacity(0.1),
-                              ),
-                            ),
-                            child: const Text("Cancel"),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (!sure) {
-                      return;
-                    }
-
-                    showDialog(
-                      context: context,
-                      builder: (context) => const AlertDialog(
-                        title: Text("Deleting..."),
-                        content: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      ),
-                    );
-
-                    await JournalsController.deleteJournal(journal.id)
-                        .whenComplete(
-                      () => Navigator.pop(context),
-                    );
-                  },
-                  leading: const Icon(BoxIcons.bx_trash),
-                  title: const Text("Delete"),
-                ),
-              ),
-              SimpleDialogOption(
-                child: ListTile(
-                  onTap: () {},
-                  leading: const Icon(BoxIcons.bx_x),
-                  title: const Text("Cancel"),
-                ),
-              ),
-            ]),
+            builder: (context) => optionsDialog(context, ref),
           );
+
+          switch (action) {
+            case OptionActions.edit:
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditJournalScreen(journal),
+                ),
+              );
+              break;
+            case OptionActions.delete:
+              {
+                bool accept = await showDialog(
+                  context: context,
+                  builder: (context) => confirmationDialog(context),
+                );
+
+                if (!accept) {
+                  return;
+                }
+
+                showDialog(
+                  context: context,
+                  builder: (context) => loadingDialog(),
+                );
+
+                await ref
+                    .read(journalsProvider.notifier)
+                    .deleteJournal(journal.id)
+                    .then((value) => Navigator.pop(context));
+
+                break;
+              }
+            case OptionActions.close:
+              break;
+          }
         },
         borderRadius: BorderRadius.circular(10),
         child: Container(
@@ -149,4 +129,80 @@ class JournalCard extends HookConsumerWidget {
       ),
     );
   }
+
+  AlertDialog loadingDialog() {
+    return const AlertDialog(
+      title: Text("Deleting..."),
+      content: SizedBox(
+        height: 150,
+        child: Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget confirmationDialog(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Are you sure?"),
+      content: Text("Delete \"${journal.title}\"?"),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+          child: const Text("Delete"),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context, false);
+          },
+          style: ButtonStyle(
+            backgroundColor: MaterialStatePropertyAll(
+              kPrimary.withOpacity(0.04),
+            ),
+          ),
+          child: const Text("Cancel"),
+        ),
+      ],
+    );
+  }
+
+  Widget optionsDialog(BuildContext context, WidgetRef ref) {
+    return SimpleDialog(children: [
+      SimpleDialogOption(
+        child: ListTile(
+          leading: const Icon(BoxIcons.bx_edit_alt),
+          title: const Text("Edit"),
+          onTap: () {
+            Navigator.pop(context, OptionActions.edit);
+          },
+        ),
+      ),
+      SimpleDialogOption(
+        child: ListTile(
+          leading: const Icon(BoxIcons.bx_trash),
+          title: const Text("Delete"),
+          onTap: () {
+            Navigator.pop(context, OptionActions.delete);
+          },
+        ),
+      ),
+      SimpleDialogOption(
+        child: ListTile(
+          leading: const Icon(BoxIcons.bx_x),
+          title: const Text("Cancel"),
+          onTap: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    ]);
+  }
 }
+
+// TODO: Reload After Deleting and Adding
+// TODO: Go to View Page with contains edit button on tap
+// TODO: Edit page will be the same us Add but contains the information 

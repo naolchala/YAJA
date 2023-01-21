@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_test/providers/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -27,14 +29,16 @@ class Shimmer extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     var themeMode = ref.watch(ThemeModeProvider);
-    return MirrorAnimationBuilder(
+    return CustomAnimationBuilder(
+      control: Control.mirror,
+      tween: Tween(begin: 0.05, end: 1.0),
+      curve: Curves.linearToEaseOut,
+      duration: const Duration(seconds: 2),
+      delay: Duration(milliseconds: 700 * index),
       builder: (context, value, child) => Opacity(
         opacity: value,
         child: child,
       ),
-      tween: Tween(begin: 0.05, end: 1.0),
-      curve: Curves.linearToEaseOut,
-      duration: const Duration(seconds: 2),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         height: 60,

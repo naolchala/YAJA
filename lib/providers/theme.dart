@@ -1,18 +1,25 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:firebase_test/compontents/week_picker.dart';
+import 'package:firebase_test/controllers/themes_controller.dart';
+import 'package:firebase_test/providers/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:firebase_test/models/theme.dart';
 
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
-  ThemeModeNotifier()
-      : super(
-          ThemeMode.dark,
-        );
+  ThemeModeNotifier() : super(ThemeMode.dark) {
+    init();
+  }
 
-  void toggleTheme() {
+  void init() async {
+    state = await ThemeController.loadTheme();
+  }
+
+  void toggleTheme() async {
     state = state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    await ThemeController.saveTheme(state);
   }
 }
 
@@ -32,7 +39,7 @@ final GeneralTheme = ({Brightness? brightness}) => ThemeData(
           .colorScheme
           .copyWith(
             primary: kPrimary,
-            secondary: kSecondary,
+            secondary: kSecondaryAccent,
           ),
     );
 

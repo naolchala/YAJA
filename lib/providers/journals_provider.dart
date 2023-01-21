@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_test/controllers/journals_controller.dart';
 import 'package:firebase_test/models/journal.dart';
 import 'package:firebase_test/providers/user.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
+
+import 'isar_service.dart';
 
 class DateNotifier extends StateNotifier<DateTime> {
   DateNotifier() : super(DateTime.now());
@@ -15,12 +18,6 @@ class DateNotifier extends StateNotifier<DateTime> {
 final dateProvider = StateNotifierProvider<DateNotifier, DateTime>((ref) {
   return DateNotifier();
 });
-
-class IsarServices {
-  Isar? instance = Isar.openSync([JournalSchema]);
-}
-
-final isar = IsarServices().instance!;
 
 class JournalState {
   final bool isLoading;
@@ -59,7 +56,7 @@ class JournalStateNotifier extends StateNotifier<JournalState> {
   final User? user;
   final DateTime currentDate;
 
-  void load() async {
+  Future<void> load() async {
     var today = DateTime(currentDate.year, currentDate.month, currentDate.day);
     var tomorrow = today.add(const Duration(days: 1));
     state = state.copyWithLoading(loading: true);
@@ -74,11 +71,31 @@ class JournalStateNotifier extends StateNotifier<JournalState> {
 
     state = state.copyWith(journals: journals, isLoading: false);
   }
+
+  Future<void> deleteJournal(int id) async {
+    await JournalsController.deleteJournal(id);
+    await load();
+  }
+
+  Future<void> addJournal(Journal journal) async {
+    await JournalsController.addJournal(journal);
+    await load();
+  }
+
+  Future<void> editJournal(Journal journal) async {
+    await JournalsController.editJournal(journal);
+    await load();
+  }
 }
 
 final journalsProvider =
-    StateNotifierProvider<JournalStateNotifier, JournalState>((ref) {
+    StateNotifierProvider.autoDispose<JournalStateNotifier, JournalState>(
+        (ref) {
   var user = ref.watch(authStateProvider);
   var currentDate = ref.watch(dateProvider);
   return JournalStateNotifier(user: user.user, currentDate: currentDate);
 });
+
+final singleJournalProvider = StreamProvider.autoDispose.family<Journal?, int>(
+  (ref, id) => isar.journals.watchObject(id, fireImmediately: true),
+);

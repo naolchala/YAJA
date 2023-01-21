@@ -89,7 +89,7 @@ class HomeScreen extends HookConsumerWidget {
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AddTaskScreen(),
+            builder: (context) => AddJournalScreen(),
           ),
         ),
         isExtended: false,
