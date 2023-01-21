@@ -27,8 +27,7 @@ final ThemeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>(
   (ref) => ThemeModeNotifier(),
 );
 
-// ignore:  prefer_function_declarations_over_variables
-final GeneralTheme = ({Brightness? brightness}) => ThemeData(
+ThemeData GeneralTheme({Brightness? brightness}) => ThemeData(
       useMaterial3: true,
       textTheme: GoogleFonts.rubikTextTheme(
         ThemeData(
